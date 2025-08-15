@@ -1,0 +1,5 @@
+{
+  "name": "Diário do Xixi na Cama",
+  "description": "Um aplicativo amigável para crianças registrarem os dias secos (sol) e os dias com xixi na cama (chuva). Os pais podem acompanhar o progresso e exportar os dados em formato CSV.",
+  "requestFramePermissions": []
+}
