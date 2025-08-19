@@ -10,7 +10,9 @@ interface DayCellProps {
 }
 
 export const DayCell: React.FC<DayCellProps> = ({ date, status, onClick }) => {
-  const isToday = new Date().toDateString() === date.toDateString();
+  const today = new Date();
+  const isToday = today.toDateString() === date.toDateString();
+  const isFutureDate = date > today;
   
   const getIcon = () => {
     switch (status) {
@@ -25,11 +27,13 @@ export const DayCell: React.FC<DayCellProps> = ({ date, status, onClick }) => {
 
   return (
     <div
-      onClick={onClick}
-      className={`relative flex flex-col items-center justify-center aspect-square cursor-pointer rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl
+      onClick={isFutureDate ? undefined : onClick}
+      className={`relative flex flex-col items-center justify-center aspect-square rounded-lg transition-all duration-300 transform 
+        ${!isFutureDate && 'cursor-pointer hover:scale-105 hover:shadow-xl'}
         ${status === LogStatus.Dry ? 'bg-yellow-100' : ''}
         ${status === LogStatus.Wet ? 'bg-blue-200' : ''}
-        ${!status ? 'bg-gray-100 hover:bg-gray-200' : ''}
+        ${!status ? 'bg-gray-100' : ''}
+        ${isFutureDate ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-200'}
       `}
     >
       <span 
