@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Diario do Xixi</string>
+    <string name="title_activity_main">Diario do Xixi</string>
+    <string name="package_name">com.ricardoapaes.diariodoxixi</string>
+    <string name="custom_url_scheme">com.ricardoapaes.diariodoxixi</string>
+</resources>
