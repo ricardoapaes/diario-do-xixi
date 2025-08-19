@@ -1,6 +1,8 @@
 
 import React from 'react';
 import { LogData } from '../types';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Capacitor } from '@capacitor/core';
 
 interface HeaderProps {
   currentDate: Date;
@@ -30,23 +32,49 @@ const ArrowLeftIcon: React.FC = () => (
 
 
 export const Header: React.FC<HeaderProps> = ({ currentDate, onPrevMonth, onNextMonth, logs, onBack }) => {
-  const handleExport = () => {
-    const sortedLogs = Object.entries(logs).sort(([dateA], [dateB]) => new Date(dateA).getTime() - new Date(dateB).getTime());
+  const handleExport = async () => {
+    try {
+      const sortedLogs = Object.entries(logs).sort(([dateA], [dateB]) => new Date(dateA).getTime() - new Date(dateB).getTime());
 
-    let csvContent = "data:text/csv;charset=utf-8,data,status\n";
-    sortedLogs.forEach(([date, status]) => {
-      const formattedDate = new Date(date + 'T00:00:00').toLocaleDateString('pt-BR');
-      const statusText = status === 'DRY' ? 'seco' : 'molhado';
-      csvContent += `${formattedDate},${statusText}\n`;
-    });
+      let csvContent = "data,status\n";
+      sortedLogs.forEach(([date, status]) => {
+        const formattedDate = new Date(date + 'T00:00:00').toLocaleDateString('pt-BR');
+        const statusText = status === 'DRY' ? 'seco' : 'molhado';
+        csvContent += `${formattedDate},${statusText}\n`;
+      });
 
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "diario_do_xixi.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+      // Get current date for the filename
+      const now = new Date();
+      const fileName = `diario_do_xixi_${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}.csv`;
+
+      // Check if running in native platform
+      if (Capacitor.isNativePlatform()) {
+        // Save using Filesystem API for mobile
+        await Filesystem.writeFile({
+          path: fileName,
+          data: csvContent,
+          directory: Directory.Documents
+        });
+        alert('Arquivo CSV exportado com sucesso para a pasta Documentos!');
+      } else {
+        // Save using browser download for PWA
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        if (link.download !== undefined) {
+          const url = URL.createObjectURL(blob);
+          link.setAttribute('href', url);
+          link.setAttribute('download', fileName);
+          link.style.visibility = 'hidden';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao exportar arquivo:', error);
+      alert('Erro ao exportar o arquivo CSV. Por favor, tente novamente.');
+    }
   };
 
   return (
